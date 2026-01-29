@@ -1,4 +1,4 @@
-# .NET DLL Inspector v2.14
+# .NET DLL Inspector v2.17
 
 A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation. Ideal for reverse-engineering or inspecting complex frameworks such as Torch and Space Engineers modding environments.
 
