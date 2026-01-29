@@ -1,4 +1,4 @@
-# .NET DLL Inspector v2.12
+# .NET DLL Inspector v2.14
 
 A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation. Ideal for reverse-engineering or inspecting complex frameworks such as Torch and Space Engineers modding environments.
 
@@ -8,7 +8,7 @@ A lightweight Python utility designed for analyzing .NET assemblies. This tool o
 
 - Analyze public classes, interfaces, and their members.
 - Search through namespaces, types, methods, and properties by keyword.
-- Optional deep inspection mode (`--deep`) includes Fields `[F]` and Events `[E]`.
+- Optional Extended (`--ext`) and Deep inspection (`--deep`) modes to include Properties `[P]`, Fields `[F]`, and Events `[E]`.
 - Automatic configuration file generation with sensible defaults.
 - Output saved to timestamped logs in the `doc/` directory.
 - Clean separation of dependencies using a local `Dependencies/` folder.
@@ -76,6 +76,14 @@ python dll-check2.py --search "ChatManager"
 
 This searches within namespaces, class names, method signatures, property names, etc.
 
+### Extended Mode
+
+To include Properties `[P]` in your results (Methods are shown by default):
+
+```
+python dll-check2.py --ext
+```
+
 ### Deep Inspection
 
 Include fields and events in the scan:
@@ -100,19 +108,19 @@ python dll-check2.py --help
 
 Each entry in the output uses short tags to indicate member type:
 
-| Tag   | Meaning                      |
-|-------|------------------------------|
-| `[P]` | Property                     |
-| `[M]` | Method                       |
-| `[F]` | Field *(only shown in --deep)* |
-| `[E]` | Event *(only shown in --deep)* |
-| `[ST]`| Static member                |
+| Tag   | Meaning                      | Switch              |
+|-------|------------------------------|---------------------|
+| `[M]` | Method                       | (Always shown)      |
+| `[ST]`| Static member (Next to tag)  | (Context dependent) |
+| `[P]` | Property                     | --ext or --deep     |
+| `[F]` | Field (Public variable)      | --deep              |
+| `[E]` | Event                        | --deep              |
 
 Example output snippet:
 ```
-[NS: Sandbox.Game.Entities.Blocks] -> MyCubeBlock
-  [P] [ST] Int32 BlockTypeID { get; }
-  [M] Void UpdateBeforeSimulation()
+[NS: Sandbox.Game.Entities.Blocks] -> Class: MyCubeBlock
+  [P] [ST] Int32 BlockTypeID
+  - Void UpdateBeforeSimulation()
   [F] [ST] Boolean IsFunctional
 ```
 
