@@ -1,4 +1,4 @@
-# .NET DLL Inspector v2.20
+# .NET DLL Inspector v2.21
 
 A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation. Ideal for reverse-engineering or inspecting complex frameworks such as Torch and Space Engineers modding environments.
 
@@ -44,7 +44,7 @@ On first run, the script generates `dll-check2.ini`.
 
 ## ▶️ Usage
 
-### 🚀 Quick/Automated Scan (New in v2.20)
+### 🚀 Quick/Automated Scan (New in v2.21)
 Use the `--default` (or `-y`) switch to skip the path prompt and use the INI settings immediately:
 ```bash
 python dll-check2.py --default --search "ChatManager"
