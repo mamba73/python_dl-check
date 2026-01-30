@@ -1,4 +1,4 @@
-# .NET DLL Inspector v2.17
+# .NET DLL Inspector v2.19
 
 A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation. Ideal for reverse-engineering or inspecting complex frameworks such as Torch and Space Engineers modding environments.
 
@@ -6,12 +6,14 @@ A lightweight Python utility designed for analyzing .NET assemblies. This tool o
 
 ## ✨ Features
 
-- Analyze public classes, interfaces, and their members.
-- Search through namespaces, types, methods, and properties by keyword.
-- Optional Extended (`--ext`) and Deep inspection (`--deep`) modes to include Properties `[P]`, Fields `[F]`, and Events `[E]`.
-- Automatic configuration file generation with sensible defaults.
-- Output saved to timestamped logs in the `doc/` directory.
-- Clean separation of dependencies using a local `Dependencies/` folder.
+- **Smart Search**: Filter by namespaces, types, methods, or properties across multiple DLLs.
+- **Progress Tracking**: Real-time console feedback during heavy assembly analysis.
+- **Modes of Inspection**:
+  - **Standard**: Methods `[M]` only (Default).
+  - **Extended (`--ext`)**: Adds Properties `[P]`.
+  - **Deep (`--deep`)**: Adds Fields `[F]` and Events `[E]`.
+- **CLI Automation**: Skip prompts using the default path switch.
+- **Clean Logging**: Automatically sanitizes search terms for log filenames and handles increments to prevent overwriting.
 
 ---
 
@@ -20,104 +22,63 @@ A lightweight Python utility designed for analyzing .NET assemblies. This tool o
 ### Prerequisites
 
 - **Python 3.x**
-- Required packages listed in `requirements.txt`
+- Required packages listed in `requirements.txt` (Mainly `pythonnet`)
 
-Install required libraries:
-
-```
+```bash
 pip install -r requirements.txt
 ```
-
-> Note: The primary dependency is [`pythonnet`](https://github.com/pythonnet/pythonnet), which enables interaction with .NET assemblies from Python.
 
 ---
 
 ## ⚙️ Configuration
 
-On first run, the script automatically generates a configuration file named after itself (e.g., `dll-check2.ini`). You can customize the following settings:
+On first run, the script generates `dll-check2.ini`.
 
-| Setting          | Description |
-|------------------|-------------|
-| `DefaultPath`    | Path where DLLs are scanned (defaults to `./Dependencies`) |
-| `FilterKeywords` | Comma-separated list of keywords to filter relevant DLLs |
-| `LogDir`         | Directory where output logs are stored (default: `doc`) |
-| `LogBaseName`    | Base name for generated report files |
-
-Example auto-generated INI content:
-```
-[SETTINGS]
-DefaultPath = ./Dependencies
-FilterKeywords = Torch,Sandbox,VRage,SpaceEngineers
-LogDir = doc
-LogBaseName = inspect_results
-```
-
-You may modify these values directly in the `.ini` file to match your environment.
+| Setting          | Description                                               |
+|------------------|-----------------------------------------------------------|
+| `DefaultPath`    | Folder to scan (default: `./Dependencies`)                |
+| `FilterKeywords` | Only scan DLLs containing these words (comma-separated)   |
+| `LogDir`         | Output directory for reports (default: `doc`)             |
 
 ---
 
 ## ▶️ Usage
 
-### Basic Scan
-
-Run the script and press Enter to scan all filtered DLLs under the default path:
-
+### 🚀 Quick/Automated Scan (New in v2.19)
+Use the `--default` (or `-y`) switch to skip the path prompt and use the INI settings immediately:
+```bash
+python dll-check2.py --default --search "ChatManager"
 ```
+
+### Search Modes
+| Command | Description |
+| :--- | :--- |
+| `python dll-check2.py --search "MySession"` | Basic method search |
+| `python dll-check2.py -e -s "Block"` | Search methods + properties |
+| `python dll-check2.py -d -s "Grid"` | Deep search (includes Fields/Events) |
+
+### Interactive Mode
+Simply run the script to be prompted for a target directory:
+```bash
 python dll-check2.py
-```
-
-### Search Mode
-
-To find specific terms across all loaded assemblies:
-
-```
-python dll-check2.py --search "ChatManager"
-```
-
-This searches within namespaces, class names, method signatures, property names, etc.
-
-### Extended Mode
-
-To include Properties `[P]` in your results (Methods are shown by default):
-
-```
-python dll-check2.py --ext
-```
-
-### Deep Inspection
-
-Include fields and events in the scan:
-
-```
-python dll-check2.py --search "MySession" --deep
-```
-
-Useful when exploring internal structure or event-driven components.
-
-### Help Command
-
-Display built-in help menu:
-
-```
-python dll-check2.py --help
 ```
 
 ---
 
 ## 🔍 Member Legend
 
-Each entry in the output uses short tags to indicate member type:
+| Tag | Meaning | Required Switch |
+| :--- | :--- | :--- |
+| `[M]` | Method | (Always shown) |
+| `[ST]`| Static member | (Context dependent) |
+| `[P]` | Property | `--ext` or `--deep` |
+| `[F]` | Field (Public variable) | `--deep` |
+| `[E]` | Event | `--deep` |
 
-| Tag   | Meaning                      | Switch              |
-|-------|------------------------------|---------------------|
-| `[M]` | Method                       | (Always shown)      |
-| `[ST]`| Static member (Next to tag)  | (Context dependent) |
-| `[P]` | Property                     | --ext or --deep     |
-| `[F]` | Field (Public variable)      | --deep              |
-| `[E]` | Event                        | --deep              |
 
-Example output snippet:
-```
+
+**Example output snippet:**
+```text
 [NS: Sandbox.Game.Entities.Blocks] -> Class: MyCubeBlock
   [P] [ST] Int32 BlockTypeID
   - Void UpdateBeforeSimulation()
@@ -128,30 +89,22 @@ Example output snippet:
 
 ## 🗂 Project Structure
 
-Ensure that you organize your project like so:
-
-```
+```text
 project-root/
 ├── dll-check2.py
 ├── dll-check2.ini       # Auto-generated config
 ├── Dependencies/        # Place DLLs here
-│   ├── Torch.dll
-│   └── VRage.dll
-└── doc/                 # Generated reports go here
+└── doc/                 # inspect_search_TEXT.txt
 ```
 
 ---
 
 ## 📜 License
-
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+MIT License.
 
 ---
 
 ## 💡 Tips
-
-- Use `git` to track changes in generated documentation inside `/doc`, but ignore large binary outputs.
-- Always ensure correct runtime context for loading .NET assemblies (especially architecture-specific ones).
-- For advanced analysis, consider integrating this tool into CI pipelines or automated mod validation workflows.
-
----
+- **Filenames**: Searching for `Sandbox.Game` will generate `inspect_search_SandboxGame.txt`.
+- **Performance**: For massive libraries (like VRage), use the interactive mode to see the `[X/Y] Analyzing...` progress tracker.
+- **Automation**: Integrate with `-y` switch in your build tasks to verify API changes after game updates.
