@@ -75,7 +75,6 @@ def inspect_dll(dll_path, search_term=None, ext_mode=False, deep_mode=False):
                 type_matches = not search_term or (search_term.lower() in type_name_full.lower())
                 temp_items = []
 
-                # 1. METHODS
                 for m in t.GetMethods(flags):
                     if m.IsSpecialName: continue
                     params = ", ".join([f"{p.ParameterType.Name} {p.Name}" for p in m.GetParameters()])
@@ -83,13 +82,11 @@ def inspect_dll(dll_path, search_term=None, ext_mode=False, deep_mode=False):
                     if not search_term or type_matches or (search_term.lower() in sig.lower()):
                         temp_items.append(f"  - {m.ReturnType.Name} {m.Name}({params})")
 
-                # 2. PROPERTIES
                 if ext_mode or deep_mode:
                     for p in t.GetProperties(flags):
                         if not search_term or type_matches or (search_term.lower() in p.Name.lower()):
                             temp_items.append(f"  [P] {p.PropertyType.Name} {p.Name}")
 
-                # 3. FIELDS & EVENTS
                 if deep_mode:
                     for f in t.GetFields(flags):
                         if not search_term or type_matches or (search_term.lower() in f.Name.lower()):
@@ -111,21 +108,29 @@ def main():
     search_term = None
     clean_search_term = ""
     ext_mode = "--ext" in sys.argv or "-e" in sys.argv
-    deep_mode = "--deep" in sys.argv or "-d" in sys.argv
+    deep_mode = "--deep" in sys.argv or "-d" in sys.argv  # -d is now Deep Mode
+    use_default_path = "--default" in sys.argv or "-y" in sys.argv # Using -y as 'yes to default'
     
-    if "--search" in sys.argv or "-s" in sys.argv:
-        try:
-            idx = sys.argv.index("--search") if "--search" in sys.argv else sys.argv.index("-s")
-            search_term = sys.argv[idx + 1]
-            clean_search_term = re.sub(r'[^\w\s-]', '', search_term).strip().replace(' ', '_')
-        except: pass
+    # Check for search term
+    for opt in ["--search", "-s"]:
+        if opt in sys.argv:
+            try:
+                idx = sys.argv.index(opt)
+                search_term = sys.argv[idx + 1]
+                clean_search_term = re.sub(r'[^\w\s-]', '', search_term).strip().replace(' ', '_')
+            except: pass
 
-    print(f"--- DLL Inspector v2.18 ---")
+    print(f"--- DLL Inspector v2.19 ---")
     print(f"Default search directory: {cfg['path']}")
-    print("Available switches: --ext (show Properties), --deep (show Fields/Events), --search <term>")
+    print("Switches: --ext (-e), --deep (-d), --default (-y), --search (-s) <term>")
     
-    user_input = input(f"Enter path (Leave blank for default 'Dependencies' folder):\n").strip()
-    target_dir = os.path.abspath(user_input if user_input else cfg['path'])
+    # Logic for skipping the prompt
+    if use_default_path:
+        print(f"[INFO] Using default path as requested: {cfg['path']}")
+        target_dir = os.path.abspath(cfg['path'])
+    else:
+        user_input = input(f"Enter path (Leave blank for default):\n").strip()
+        target_dir = os.path.abspath(user_input if user_input else cfg['path'])
 
     if not os.path.isdir(target_dir):
         print(f"Error: Directory '{target_dir}' not found."); return
@@ -140,11 +145,9 @@ def main():
     
     log_path = get_unique_filename(cfg['log_dir'], log_base, "txt")
 
-    # STARTING PROMPT
     print(f"\n[INFO] Starting inspection...")
-    if search_term:
-        print(f"[INFO] Searching for keyword: '{search_term}'")
-    print(f"[INFO] Results will be saved to: {log_path}\n")
+    if search_term: print(f"[INFO] Keyword: '{search_term}'")
+    print(f"[INFO] Log file: {log_path}\n")
 
     with open(log_path, "w", encoding="utf-8") as f:
         f.write(f"REPORT: {target_dir}\n" + "="*40 + "\n")
@@ -152,8 +155,6 @@ def main():
 
         total_files = len(dll_files)
         for index, dll in enumerate(dll_files, start=1):
-            # LIVE UPDATE IN CONSOLE
-            # Using \r and end="" to overwrite the same line
             status_msg = f"[{index}/{total_files}] Analyzing: {dll}"
             print(f"\r{status_msg[:75].ljust(75)}", end="", flush=True)
 
@@ -163,7 +164,7 @@ def main():
                 for line in matches:
                     f.write(line + "\n")
 
-    print(f"\n\nDONE! Inspection complete. File created: {log_path}")
+    print(f"\n\nDONE! Inspection complete. File: {log_path}")
 
 if __name__ == "__main__":
     main()
