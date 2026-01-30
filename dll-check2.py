@@ -105,26 +105,33 @@ def inspect_dll(dll_path, search_term=None, ext_mode=False, deep_mode=False):
     return (version, results)
 
 def main():
+    # Switches definition
+    switches = ["--ext", "-e", "--deep", "-d", "--default", "-y", "--search", "-s"]
+    
+    ext_mode = "--ext" in sys.argv or "-e" in sys.argv
+    deep_mode = "--deep" in sys.argv or "-d" in sys.argv
+    use_default_path = "--default" in sys.argv or "-y" in sys.argv
+    
     search_term = None
     clean_search_term = ""
-    ext_mode = "--ext" in sys.argv or "-e" in sys.argv
-    deep_mode = "--deep" in sys.argv or "-d" in sys.argv  # -d is now Deep Mode
-    use_default_path = "--default" in sys.argv or "-y" in sys.argv # Using -y as 'yes to default'
     
-    # Check for search term
+    # Smarter search term detection
     for opt in ["--search", "-s"]:
         if opt in sys.argv:
             try:
                 idx = sys.argv.index(opt)
-                search_term = sys.argv[idx + 1]
-                clean_search_term = re.sub(r'[^\w\s-]', '', search_term).strip().replace(' ', '_')
+                # Look at subsequent arguments to find the first one that isn't another switch
+                for i in range(idx + 1, len(sys.argv)):
+                    if sys.argv[i] not in switches:
+                        search_term = sys.argv[i]
+                        clean_search_term = re.sub(r'[^\w\s-]', '', search_term).strip().replace(' ', '_')
+                        break
             except: pass
 
-    print(f"--- DLL Inspector v2.19 ---")
+    print(f"--- DLL Inspector v2.20 ---")
     print(f"Default search directory: {cfg['path']}")
     print("Switches: --ext (-e), --deep (-d), --default (-y), --search (-s) <term>")
     
-    # Logic for skipping the prompt
     if use_default_path:
         print(f"[INFO] Using default path as requested: {cfg['path']}")
         target_dir = os.path.abspath(cfg['path'])
