@@ -1,19 +1,16 @@
-# .NET DLL Inspector v2.21
+# .NET DLL Inspector v2.25
 
-A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation. Ideal for reverse-engineering or inspecting complex frameworks such as Torch and Space Engineers modding environments.
+A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation.
 
 ---
 
 ## ✨ Features
 
-- **Smart Search**: Filter by namespaces, types, methods, or properties across multiple DLLs.
-- **Progress Tracking**: Real-time console feedback during heavy assembly analysis.
-- **Modes of Inspection**:
-  - **Standard**: Methods `[M]` only (Default).
-  - **Extended (`--ext`)**: Adds Properties `[P]`.
-  - **Deep (`--deep`)**: Adds Fields `[F]` and Events `[E]`.
-- **CLI Automation**: Skip prompts using the default path switch.
-- **Clean Logging**: Automatically sanitizes search terms for log filenames and handles increments to prevent overwriting.
+- **Smart Search & Filter**: Find specific classes (`-s`) and then drill down into specific members (`-f`) to avoid massive log files.
+- **Structural Analysis**: Supports Classes, Interfaces, and **Structs** (ValueTypes).
+- **Progress Tracking**: Real-time console feedback with a cleaner UI.
+- **CLI Automation**: Skip prompts using the default path switch (`-y`).
+- **Sanitized Logging**: Filenames are automatically generated based on your search and filter terms.
 
 ---
 
@@ -22,7 +19,7 @@ A lightweight Python utility designed for analyzing .NET assemblies. This tool o
 ### Prerequisites
 
 - **Python 3.x**
-- Required packages listed in `requirements.txt` (Mainly `pythonnet`)
+- Required packages: `pythonnet`
 
 ```bash
 pip install -r requirements.txt
@@ -44,23 +41,32 @@ On first run, the script generates `dll-check2.ini`.
 
 ## ▶️ Usage
 
-### 🚀 Quick/Automated Scan (New in v2.21)
-Use the `--default` (or `-y`) switch to skip the path prompt and use the INI settings immediately:
+### 🚀 The "Sniper" Search (New in v2.24+)
+If a class like `MySession` has thousands of lines, use the filter to find exactly what you need:
 ```bash
-python dll-check2.py --default --search "ChatManager"
+# Finds MySession class, but shows ONLY members containing "Players"
+python dll-check2.py -y -d -s MySession -f Players
 ```
 
-### Search Modes
-| Command | Description |
-| :--- | :--- |
-| `python dll-check2.py --search "MySession"` | Basic method search |
-| `python dll-check2.py -e -s "Block"` | Search methods + properties |
-| `python dll-check2.py -d -s "Grid"` | Deep search (includes Fields/Events) |
+### 🔍 Quick Switches
+| Switch | Long Form | Description |
+| :--- | :--- | :--- |
+| `-s` | `--search` | Keyword for Namespace or Class name |
+| `-f` | `--filter` | Keyword for Member (Method/Field/Property) name |
+| `-d` | `--deep` | Deep mode: Includes Fields `[F]` and Events `[E]` |
+| `-e` | `--ext` | Extended mode: Includes Properties `[P]` |
+| `-y` | `--default`| Skip path prompt and use INI default |
+| `-h` | `--help` | Show help menu |
 
-### Interactive Mode
-Simply run the script to be prompted for a target directory:
+### 💡 Examples
+**Basic search for a struct:**
 ```bash
-python dll-check2.py
+python dll-check2.py -y -d -s MyDamageInformation
+```
+
+**Deep search in default folder without prompts:**
+```bash
+python dll-check2.py -y -d -s MyCubeBlock
 ```
 
 ---
@@ -70,19 +76,18 @@ python dll-check2.py
 | Tag | Meaning | Required Switch |
 | :--- | :--- | :--- |
 | `[M]` | Method | (Always shown) |
-| `[ST]`| Static member | (Context dependent) |
-| `[P]` | Property | `--ext` or `--deep` |
-| `[F]` | Field (Public variable) | `--deep` |
-| `[E]` | Event | `--deep` |
+| `[ST]`| Static member | (Automatic detection) |
+| `[P]` | Property | `-e` or `-d` |
+| `[F]` | Field (Public variable) | `-d` |
+| `[E]` | Event | `-d` |
 
 
 
 **Example output snippet:**
 ```text
-[NS: Sandbox.Game.Entities.Blocks] -> Class: MyCubeBlock
-  [P] [ST] Int32 BlockTypeID
-  - Void UpdateBeforeSimulation()
-  [F] [ST] Boolean IsFunctional
+[NS: Sandbox.Game.World] -> Class: MySession
+  [P] [ST] MyFactionManager Factions
+  [P] [ST] MyPlayerCollection Players
 ```
 
 ---
@@ -94,17 +99,10 @@ project-root/
 ├── dll-check2.py
 ├── dll-check2.ini       # Auto-generated config
 ├── Dependencies/        # Place DLLs here
-└── doc/                 # inspect_search_TEXT.txt
+└── doc/                 # inspect_search_Term_filter_Term.txt
 ```
 
 ---
 
 ## 📜 License
 MIT License.
-
----
-
-## 💡 Tips
-- **Filenames**: Searching for `Sandbox.Game` will generate `inspect_search_SandboxGame.txt`.
-- **Performance**: For massive libraries (like VRage), use the interactive mode to see the `[X/Y] Analyzing...` progress tracker.
-- **Automation**: Integrate with `-y` switch in your build tasks to verify API changes after game updates.
