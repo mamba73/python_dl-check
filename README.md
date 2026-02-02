@@ -1,108 +1,94 @@
-# .NET DLL Inspector v2.25
+# .NET DLL Inspector v2.26
 
-A lightweight Python utility designed for analyzing .NET assemblies. This tool offers a structured overview of class hierarchies, members, properties, methods, fields, and events—without requiring full decompilation.
-
----
-
-## ✨ Features
-
-- **Smart Search & Filter**: Find specific classes (`-s`) and then drill down into specific members (`-f`) to avoid massive log files.
-- **Structural Analysis**: Supports Classes, Interfaces, and **Structs** (ValueTypes).
-- **Progress Tracking**: Real-time console feedback with a cleaner UI.
-- **CLI Automation**: Skip prompts using the default path switch (`-y`).
-- **Sanitized Logging**: Filenames are automatically generated based on your search and filter terms.
+Snažan i lagan Python alat za dubinsku analizu .NET sklopova (assemblies). Dizajniran posebno za modere (Space Engineers, Torch, itd.) kako bi brzo mapirali nepoznate API-je, otkrili skrivene članove i razumjeli hijerarhiju klasa bez dekompilacije.
 
 ---
 
-## 📦 Installation
+## ✨ Nove značajke (v2.26)
 
-### Prerequisites
+- **C# Type Cleanup**: Pretvara sirove .NET tipove u čitljiv C# format (npr. `Int64` -> `long`, `Single` -> `float`).
+- **Generics Support**: Pravilno formatira generičke liste i rječnike (npr. `List<IMyPlayer>` umjesto `List`1`).
+- **Inheritance Tracking**: Uz svaku klasu ispisuje njezinu roditeljsku klasu (Base Class), što olakšava navigaciju kroz SE framework.
+- **VS Code Integration**: Dodan `-o` switch za trenutno otvaranje izvještaja u novom tabu aktivnog VS Code prozora.
+
+---
+
+## 📦 Instalacija i preduvjeti
 
 - **Python 3.x**
-- Required packages: `pythonnet`
-
-```bash
-pip install -r requirements.txt
-```
+- Paket: `pip install pythonnet`
+- VS Code (opcionalno, za `-o` switch)
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Konfiguracija
 
-On first run, the script generates `dll-check2.ini`.
+Kod prvog pokretanja, alat generira `dll-check2.ini`.
 
-| Setting          | Description                                               |
-|------------------|-----------------------------------------------------------|
-| `DefaultPath`    | Folder to scan (default: `./Dependencies`)                |
-| `FilterKeywords` | Only scan DLLs containing these words (comma-separated)   |
-| `LogDir`         | Output directory for reports (default: `doc`)             |
+| Postavka | Opis |
+| :--- | :--- |
+| `DefaultPath` | Putanja do foldera s DLL-ovima koje najčešće skeniraš. |
+| `FilterKeywords` | Ključne riječi za filtriranje DLL datoteka (npr. `Sandbox, VRage`). |
 
 ---
 
-## ▶️ Usage
+## ▶️ Korištenje i Switchevi
 
-### 🚀 The "Sniper" Search (New in v2.24+)
-If a class like `MySession` has thousands of lines, use the filter to find exactly what you need:
+### 🎯 "Sniper" Mode (Preporučeno)
+Kada tražiš točno određeni podatak unutar ogromne klase:
 ```bash
-# Finds MySession class, but shows ONLY members containing "Players"
-python dll-check2.py -y -d -s MySession -f Players
+# Traži 'Players' unutar 'MySession', ispisuje duboke detalje i otvara u VS Code-u
+python dll-check2.py -y -d -s MySession -f Players -o
 ```
 
-### 🔍 Quick Switches
-| Switch | Long Form | Description |
+### 🔍 Popis svih opcija
+| Switch | Dugi oblik | Opis |
 | :--- | :--- | :--- |
-| `-s` | `--search` | Keyword for Namespace or Class name |
-| `-f` | `--filter` | Keyword for Member (Method/Field/Property) name |
-| `-d` | `--deep` | Deep mode: Includes Fields `[F]` and Events `[E]` |
-| `-e` | `--ext` | Extended mode: Includes Properties `[P]` |
-| `-y` | `--default`| Skip path prompt and use INI default |
-| `-h` | `--help` | Show help menu |
-
-### 💡 Examples
-**Basic search for a struct:**
-```bash
-python dll-check2.py -y -d -s MyDamageInformation
-```
-
-**Deep search in default folder without prompts:**
-```bash
-python dll-check2.py -y -d -s MyCubeBlock
-```
+| `-s` | `--search` | Ključna riječ za Naziv Klase ili Namespace. |
+| `-f` | `--filter` | Ključna riječ za Člana (metoda, field, property). |
+| `-d` | `--deep` | Deep mode: Uključuje Fieldove `[F]` i Evente `[E]`. |
+| `-e` | `--ext` | Extended mode: Uključuje Propertyje `[P]`. |
+| `-y` | `--default`| Preskače upit za putanju (koristi onu iz INI-ja). |
+| `-o` | `--open` | Automatski otvara rezultat u VS Code-u. |
+| `-h` | `--help` | Prikazuje kratke upute. |
 
 ---
 
-## 🔍 Member Legend
+## 📖 Kako čitati izvještaj?
 
-| Tag | Meaning | Required Switch |
+v2.26 donosi čitljivost koja odgovara tvom C# kôdu:
+
+| Oznaka | Značenje | Napomena |
 | :--- | :--- | :--- |
-| `[M]` | Method | (Always shown) |
-| `[ST]`| Static member | (Automatic detection) |
-| `[P]` | Property | `-e` or `-d` |
-| `[F]` | Field (Public variable) | `-d` |
-| `[E]` | Event | `-d` |
+| `Class: X : Y` | Klasa X nasljeđuje Y | **Novo u v2.26** |
+| `[ST]` | Statički član | Pristupaš mu sa `Klasa.Static...` |
+| `[F]` | Field (Varijabla) | Zahtijeva `-d` |
+| `[P]` | Property | Zahtijeva `-e` ili `-d` |
+| `-` | Metoda | Uvijek se prikazuje |
 
-
-
-**Example output snippet:**
+### Primjer očišćenog ispisa:
 ```text
-[NS: Sandbox.Game.World] -> Class: MySession
+FILE: Sandbox.Game.dll
+========================================
+[NS: Sandbox.Game.World] -> Class: MySession : MySessionBase
   [P] [ST] MyFactionManager Factions
   [P] [ST] MyPlayerCollection Players
+  - [ST] void SetLastDamage(MyDamageInformation info)
 ```
 
 ---
 
-## 🗂 Project Structure
+## 🗂 Struktura projekta
 
 ```text
 project-root/
 ├── dll-check2.py
-├── dll-check2.ini       # Auto-generated config
-├── Dependencies/        # Place DLLs here
-└── doc/                 # inspect_search_Term_filter_Term.txt
+├── dll-check2.ini       # Automatska konfiguracija
+├── Dependencies/        # DLL datoteke za analizu
+└── doc/                 # Generirani izvještaji (.txt)
 ```
 
 ---
 
-## 📜 License
+## 📜 Licenca
 MIT License.
