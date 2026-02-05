@@ -1,72 +1,72 @@
-# .NET DLL Inspector v2.26
+# # .NET DLL Inspector v2.26
 
-Snažan i lagan Python alat za dubinsku analizu .NET sklopova (assemblies). Dizajniran posebno za modere (Space Engineers, Torch, itd.) kako bi brzo mapirali nepoznate API-je, otkrili skrivene članove i razumjeli hijerarhiju klasa bez dekompilacije.
-
----
-
-## ✨ Nove značajke (v2.26)
-
-- **C# Type Cleanup**: Pretvara sirove .NET tipove u čitljiv C# format (npr. `Int64` -> `long`, `Single` -> `float`).
-- **Generics Support**: Pravilno formatira generičke liste i rječnike (npr. `List<IMyPlayer>` umjesto `List`1`).
-- **Inheritance Tracking**: Uz svaku klasu ispisuje njezinu roditeljsku klasu (Base Class), što olakšava navigaciju kroz SE framework.
-- **VS Code Integration**: Dodan `-o` switch za trenutno otvaranje izvještaja u novom tabu aktivnog VS Code prozora.
+A powerful and lightweight Python tool for deep analysis of .NET assemblies. Designed specifically for modders (Space Engineers, Torch, etc.) to quickly map unknown APIs, discover hidden members, and understand class hierarchies without decompilation.
 
 ---
 
-## 📦 Instalacija i preduvjeti
+## ✨ New Features (v2.26)
+
+- **C# Type Cleanup**: Converts raw .NET types into readable C# format (e.g., `Int64` -> `long`, `Single` -> `float`).
+- **Generics Support**: Properly formats generic lists and dictionaries (e.g., `List<IMyPlayer>` instead of `List`1`).
+- **Inheritance Tracking**: Displays the parent class (Base Class) next to each class, making navigation through the SE framework easier.
+- **VS Code Integration**: Added `-o` switch to instantly open reports in a new tab of the active VS Code window.
+
+---
+
+## 📦 Installation and Prerequisites
 
 - **Python 3.x**
-- Paket: `pip install pythonnet`
-- VS Code (opcionalno, za `-o` switch)
+- Package: `pip install pythonnet`
+- VS Code (optional, for the `-o` switch)
 
 ---
 
-## ⚙️ Konfiguracija
+## ⚙️ Configuration
 
-Kod prvog pokretanja, alat generira `dll-check2.ini`.
+Upon the first run, the tool generates `dll-check2.ini`.
 
-| Postavka | Opis |
+| Setting | Description |
 | :--- | :--- |
-| `DefaultPath` | Putanja do foldera s DLL-ovima koje najčešće skeniraš. |
-| `FilterKeywords` | Ključne riječi za filtriranje DLL datoteka (npr. `Sandbox, VRage`). |
+| `DefaultPath` | Path to the folder containing the DLLs you scan most frequently. |
+| `FilterKeywords` | Keywords for filtering DLL files (e.g., `Sandbox, VRage`). |
 
 ---
 
-## ▶️ Korištenje i Switchevi
+## ▶️ Usage and Switches
 
-### 🎯 "Sniper" Mode (Preporučeno)
-Kada tražiš točno određeni podatak unutar ogromne klase:
+### 🎯 "Sniper" Mode (Recommended)
+When looking for specific data within a massive class:
 ```bash
-# Traži 'Players' unutar 'MySession', ispisuje duboke detalje i otvara u VS Code-u
+# Searches for 'Players' inside 'MySession', prints deep details, and opens in VS Code
 python dll-check2.py -y -d -s MySession -f Players -o
 ```
 
-### 🔍 Popis svih opcija
-| Switch | Dugi oblik | Opis |
+### 🔍 List of All Options
+| Switch | Long Form | Description |
 | :--- | :--- | :--- |
-| `-s` | `--search` | Ključna riječ za Naziv Klase ili Namespace. |
-| `-f` | `--filter` | Ključna riječ za Člana (metoda, field, property). |
-| `-d` | `--deep` | Deep mode: Uključuje Fieldove `[F]` i Evente `[E]`. |
-| `-e` | `--ext` | Extended mode: Uključuje Propertyje `[P]`. |
-| `-y` | `--default`| Preskače upit za putanju (koristi onu iz INI-ja). |
-| `-o` | `--open` | Automatski otvara rezultat u VS Code-u. |
-| `-h` | `--help` | Prikazuje kratke upute. |
+| `-s` | `--search` | Keyword for Class Name or Namespace. |
+| `-f` | `--filter` | Keyword for Member (method, field, property). |
+| `-d` | `--deep` | Deep mode: Includes Fields `[F]` and Events `[E]`. |
+| `-e` | `--ext` | Extended mode: Includes Properties `[P]`. |
+| `-y` | `--default`| Skips path prompt (uses the one from INI). |
+| `-o` | `--open` | Automatically opens the result in VS Code. |
+| `-h` | `--help` | Shows brief instructions. |
 
 ---
 
-## 📖 Kako čitati izvještaj?
+## 📖 How to Read the Report?
 
-v2.26 donosi čitljivost koja odgovara tvom C# kôdu:
+v2.26 brings readability that matches your C# code:
 
-| Oznaka | Značenje | Napomena |
+| Tag | Meaning | Note |
 | :--- | :--- | :--- |
-| `Class: X : Y` | Klasa X nasljeđuje Y | **Novo u v2.26** |
-| `[ST]` | Statički član | Pristupaš mu sa `Klasa.Static...` |
-| `[F]` | Field (Varijabla) | Zahtijeva `-d` |
-| `[P]` | Property | Zahtijeva `-e` ili `-d` |
-| `-` | Metoda | Uvijek se prikazuje |
+| `Class: X : Y` | Class X inherits Y | **New in v2.26** |
+| `[ST]` | Static member | Accessed via `Class.Static...` |
+| `[F]` | Field (Variable) | Requires `-d` |
+| `[P]` | Property | Requires `-e` or `-d` |
+| `-` | Method | Always displayed |
 
-### Primjer očišćenog ispisa:
+### Example of Cleaned Output:
 ```text
 FILE: Sandbox.Game.dll
 ========================================
@@ -78,17 +78,19 @@ FILE: Sandbox.Game.dll
 
 ---
 
-## 🗂 Struktura projekta
+## 🗂 Project Structure
 
 ```text
 project-root/
 ├── dll-check2.py
-├── dll-check2.ini       # Automatska konfiguracija
-├── Dependencies/        # DLL datoteke za analizu
-└── doc/                 # Generirani izvještaji (.txt)
+├── dll-check2.ini        # Automatic configuration
+├── Dependencies/         # DLL files for analysis
+└── doc/                  # Generated reports (.txt)
 ```
 
 ---
 
-## 📜 Licenca
+## 📜 License
 MIT License.
+
+[Buy Me a Coffee ☕](https://buymeacoffee.com/mamba73)
